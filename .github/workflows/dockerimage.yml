@@ -16,8 +16,6 @@ jobs:
     - uses: actions/checkout@master
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag dataries/zookeeper:$(date +%s)
-
-    - uses: actions/checkout@master
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
