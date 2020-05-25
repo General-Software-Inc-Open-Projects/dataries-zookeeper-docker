@@ -1,5 +1,4 @@
 /.git
 .gitignore
-
 docker-compose.yml
-.drone.yml
+README.md
