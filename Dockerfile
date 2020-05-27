@@ -6,7 +6,7 @@ LABEL maintainer="Gilberto Muñoz <gilberto@generalsoftwareinc.com>"
 ENV ZOOKEEPER_HOME=/opt/zookeeper \
     ZOOKEEPER_VERION=3.4.14
 
-ARG NEXUS_ZOOKEEPER=https://dataries-registry.generalsoftwareinc.net/repository/apache-cache-registry/zookeeper-${ZOOKEEPER_VERION}.tar.gz
+ARG ZOOKEEPER_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOOKEEPER_VERION}/zookeeper-${ZOOKEEPER_VERION}.tar.gz
 
 RUN useradd -lrmU dataries
 
@@ -16,7 +16,7 @@ RUN apt-get update && \
     apt-get autoremove --yes && \
     apt-get clean
 
-RUN curl ${NEXUS_ZOOKEEPER} | tar -xz -C /opt && \
+RUN curl ${ZOOKEEPER_URL} | tar -xz -C /opt && \
     mv /opt/zookeeper-${ZOOKEEPER_VERION} ${ZOOKEEPER_HOME} && \
     mkdir /var/zookeeper && \
     chown -R dataries:dataries \
