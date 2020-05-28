@@ -33,3 +33,5 @@ ENTRYPOINT entrypoint.sh
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=60s \
     CMD healthcheck.sh
+    
+EXPOSE 2888 3888
