@@ -1,5 +1,5 @@
 FROM openjdk:8-jdk-slim
-LABEL version="gsi"
+LABEL version="3.4.14"
 LABEL maintainer="Gilberto Muñoz <gilberto@generalsoftwareinc.com>"
 
 
@@ -8,7 +8,7 @@ ENV ZOOKEEPER_HOME=/opt/zookeeper \
 
 ARG ZOOKEEPER_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOOKEEPER_VERION}/zookeeper-${ZOOKEEPER_VERION}.tar.gz
 
-RUN useradd -lrmU dataries
+RUN useradd -lrmU non-root
 
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \ 
@@ -19,15 +19,15 @@ RUN apt-get update && \
 RUN curl ${ZOOKEEPER_URL} | tar -xz -C /opt && \
     mv /opt/zookeeper-${ZOOKEEPER_VERION} ${ZOOKEEPER_HOME} && \
     mkdir /var/zookeeper && \
-    chown -R dataries:dataries \
+    chown -R non-root:non-root \
         ${ZOOKEEPER_HOME} \
         /var/zookeeper
 
-USER dataries
+USER non-root
 
 WORKDIR ${ZOOKEEPER_HOME}
 
-COPY --chown=dataries:dataries healthcheck.sh entrypoint.sh /usr/bin/
+COPY --chown=non-root:non-root healthcheck.sh entrypoint.sh /usr/bin/
 
 ENTRYPOINT entrypoint.sh
 
