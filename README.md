@@ -13,14 +13,14 @@ This image was created with the intention of achieving an easier deployment of A
 
 # How to use this image
 
-## Start a single node Pulsar server
+## Start a single node Zookeeper server
 
 ~~~bash
 ~~~
 
 ## Persist data
 
-## Connect to Pulsar from the command line client
+## Connect to Zookeeper from the command line client
 
 ~~~bash
 ~~~
