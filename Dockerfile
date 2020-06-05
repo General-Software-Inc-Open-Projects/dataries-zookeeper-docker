@@ -1,37 +1,36 @@
-FROM openjdk:8-jdk-slim
-LABEL version="3.4.14"
+FROM openjdk:11-jre-slim
+LABEL version="3.6.1"
 LABEL maintainer="Gilberto Muñoz <gilberto@generalsoftwareinc.com>"
 
 
-ENV ZOOKEEPER_HOME=/opt/zookeeper \
-    ZOOKEEPER_VERION=3.4.14
+ENV ZOO_VERION="3.6.1" \
+    ZOO_HOME="/opt/zookeeper" \
+    PATH="${PATH}:${ZOO_HOME}/bin"
 
-ARG ZOOKEEPER_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOOKEEPER_VERION}/zookeeper-${ZOOKEEPER_VERION}.tar.gz
+ARG ZOOKEEPER_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOO_VERION}/zookeeper-${ZOO_VERION}.tar.gz
 
-RUN useradd -lrmU non-root
+RUN set -eux; \
+        useradd -lU zookeeper
 
-RUN apt-get update && \
-    apt-get install --yes --no-install-recommends \ 
-        curl && \
-    apt-get autoremove --yes && \
-    apt-get clean
+RUN set -eux; \
+        apt-get update; \
+        apt-get install --yes --no-install-recommends \ 
+            curl; \
+        apt-get autoremove --yes; \
+        apt-get clean
 
-RUN curl ${ZOOKEEPER_URL} | tar -xz -C /opt && \
-    mv /opt/zookeeper-${ZOOKEEPER_VERION} ${ZOOKEEPER_HOME} && \
-    mkdir /var/zookeeper && \
-    chown -R non-root:non-root \
-        ${ZOOKEEPER_HOME} \
-        /var/zookeeper
+RUN set -eux; \
+        curl ${ZOOKEEPER_URL} | tar -xz -C /opt; \
+        mv /opt/zookeeper-${ZOO_VERION} ${ZOO_HOME}; \
+        chown -R zookeeper:zookeeper ${ZOO_HOME}
 
-USER non-root
+USER zookeeper
 
-WORKDIR ${ZOOKEEPER_HOME}
+WORKDIR ${ZOO_HOME}
 
-COPY --chown=non-root:non-root healthcheck.sh entrypoint.sh /usr/bin/
+COPY --chown=zookeeper:zookeeper healthcheck.sh entrypoint.sh /usr/bin/
 
-ENTRYPOINT entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=60s \
-    CMD healthcheck.sh
-    
-EXPOSE 2888 3888
+    CMD ["healthcheck.sh"]

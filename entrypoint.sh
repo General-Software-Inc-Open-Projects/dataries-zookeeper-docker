@@ -1,22 +1,49 @@
 #!/bin/bash
 
-mv "$ZOOKEEPER_HOME/conf/zoo_sample.cfg" "$ZOOKEEPER_HOME/conf/zoo.cfg"
-sed -i "s/^\(\s*dataDir\s*=\s*\).*/\1\/var\/zookeeper/" "$ZOOKEEPER_HOME/conf/zoo.cfg"
-echo $ZOO_ID > /var/zookeeper/myid
+set -e
 
-for (( i=1; i<=$ZOO_AMOUNT; i++ )); do
-    temp="server.$i=$ZOO_HOSTNAME_FORMAT:2888:3888"
-    temp=${temp/\{ZOO_ID\}/$i}
-    echo $temp >> $ZOOKEEPER_HOME/conf/zoo.cfg
-done
 
-$ZOOKEEPER_HOME/bin/zkServer.sh start
+# Set all the must-have env vars.
+ZOO_dataDir="${ZOOKEEPER_HOME}/data"
+ZOO_dataLogDir="${ZOOKEEPER_HOME}/datalog"
 
-sleep 15
-tail -f zookeeper.out &
+if [[ -z $ZOO_SERVERS ]]; then
+      ZOO_SERVERS="server.1=localhost:2888:3888;2181"
+fi
+if [[ -z $ZOO_ID ]]; then
+      ZOO_ID="1"
+fi
 
-while [[ $( jps | grep -o 'QuorumPeerMain' | wc -l ) -ne 0 ]]; do
-    sleep 5
-done
+if [[ -z $ZOO_tickTime ]]; then
+      ZOO_tickTime="2000"
+fi
+if [[ -z $ZOO_clientPort ]]; then
+      ZOO_clientPort="2128"
+fi
 
-exit 1
+
+# Create ID file if missing.
+if [[ ! -f "$ZOO_dataDir/myid" ]]; then
+    echo "${ZOO_ID}" > "$ZOO_dataDir/myid"
+fi
+
+
+# Create conf files if missing.
+CONFIG="$ZOO_HOME/conf/zoo.cfg"
+if [[ ! -f "$CONFIG" ]]; then
+    {
+        echo "dataDir=$ZOO_dataDir" 
+        echo "dataLogDir=$ZOO_dataLogDir"
+
+        echo "tickTime=$ZOO_tickTime"
+        echo "initLimit=$ZOO_initLimit"
+        echo "syncLimit=$ZOO_syncLimit"
+    } >> "$CONFIG"
+
+    for server in $ZOO_SERVERS; do
+        echo "$server" >> "$CONFIG"
+    done
+fi
+
+# Start server.
+zkServer.sh start-foreground

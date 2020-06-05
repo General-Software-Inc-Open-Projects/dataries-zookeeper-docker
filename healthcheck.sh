@@ -1,6 +1,6 @@
 #!/bin/bash
 
-zoo_status=$($ZOOKEEPER_HOME/bin/zkServer.sh status | grep -o Error | wc -l)
+zoo_status=$(zkServer.sh status | grep -o Error | wc -l)
 
 if [[ $zoo_status -eq 0 ]]; then
     exit 0
