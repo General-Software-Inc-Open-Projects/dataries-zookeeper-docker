@@ -2,11 +2,16 @@
 
 set -e
 
-# Fix log and data paths to specific locations (no further configurations for theese)
-export CONF_ZOO_dataDir="$ZOOKEEPER_HOME/data"
+# Fix data path to specific location (no further configurations for this)
+export CONF_ZOO_dataDir="$ZOO_HOME/data"
+
+# Create data folder if missing
+if [[ ! -f "$CONF_ZOO_dataDir" ]]; then
+    mkdir "$CONF_ZOO_dataDir"
+fi
 
 # Create conf files if missing
-local config="$ZOO_HOME/conf"
+config="$ZOO_HOME/conf"
 if [[ ! -f "$config/zoo.cfg" ]]; then
     touch "$config/zoo.cfg"
 fi
@@ -15,17 +20,17 @@ if [[ ! -f "$config/log4j.properties" ]]; then
 fi
 
 # Set required parameters to defaults if missing
-if [[ ! grep -Fxq "tickTime" "$config/zoo.cfg" ]]; then
+if ! grep -Fxq "tickTime" "$config/zoo.cfg"; then
     if [[ -z $CONF_ZOO_tickTime ]]; then
         export ZOO_tickTime="2000"
     fi
 fi
-if [[ ! grep -Fxq "clientPort" "$config/zoo.cfg" ]]; then
+if ! grep -Fxq "clientPort" "$config/zoo.cfg"; then
     if [[ -z $CONF_ZOO_clientPort ]]; then
         export ZOO_clientPort="2128"
     fi
 fi
-if [[ ! grep -Fxq "server." "$config/zoo.cfg" ]]; then
+if ! grep -Fxq "server." "$config/zoo.cfg"; then
     if [[ -z $ZOO_SERVERS ]]; then
         export ZOO_SERVERS="server.1=localhost:2888:3888;2181"
     fi
@@ -72,7 +77,7 @@ function configure() {
     local value
     
     for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do 
-        
+
         name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
         var="${envPrefix}_${c}"
         value=${!var}
@@ -83,5 +88,5 @@ function configure() {
 configure $config/zoo.cfg CONF_ZOO
 configure $config/log4j.properties CONF_LOG4J
 
-# Start server.
+# Start server
 zkServer.sh start-foreground
