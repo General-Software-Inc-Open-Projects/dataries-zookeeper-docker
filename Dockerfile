@@ -23,7 +23,8 @@ RUN set -eux; \
         mv /opt/apache-zookeeper-${ZOO_VERION}-bin ${ZOO_HOME}; \
         chown -R zookeeper:zookeeper ${ZOO_HOME}
 
-ENV PATH="${PATH}:${ZOO_HOME}/bin"
+ENV PATH="${PATH}:${ZOO_HOME}/bin" \
+    ZOOCFGDIR="${ZOO_HOME}/conf"
 
 USER zookeeper
 
