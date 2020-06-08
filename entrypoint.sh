@@ -11,7 +11,6 @@ fi
 config="$ZOO_HOME/conf"
 if [[ ! -f "$config/zoo.cfg" ]]; then
     cp "$config/zoo_sample.cfg" "$config/zoo.cfg"
-    sed -i "s|^\(dataDir=\).*|\1$CONF_ZOO_dataDir|" "$config/zoo.cfg"
 fi
 
 # Handle ZOO_MY_ID special case
@@ -38,7 +37,7 @@ function upsertProperty() {
     local name=$2
     local value=$3
 
-    if grep -Fxq "$name=" "$path"; then
+    if grep -q "^$name=" "$path"; then
         sed -i "s|^\($name=\).*|\1$value|" $path
     else
         echo "$name=$value" >> "$path"
@@ -51,8 +50,8 @@ function configure() {
 
     local var
     local value
-    
-    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do 
+
+    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
         name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
         var="${envPrefix}_${c}"
         value=${!var}
