@@ -2,48 +2,86 @@
 
 set -e
 
+# Fix log and data paths to specific locations (no further configurations for theese)
+export CONF_ZOO_dataDir="$ZOOKEEPER_HOME/data"
 
-# Set all the must-have env vars.
-ZOO_dataDir="${ZOOKEEPER_HOME}/data"
-ZOO_dataLogDir="${ZOOKEEPER_HOME}/datalog"
-
-if [[ -z $ZOO_SERVERS ]]; then
-      ZOO_SERVERS="server.1=localhost:2888:3888;2181"
+# Create conf files if missing
+local config="$ZOO_HOME/conf"
+if [[ ! -f "$config/zoo.cfg" ]]; then
+    touch "$config/zoo.cfg"
 fi
-if [[ -z $ZOO_ID ]]; then
-      ZOO_ID="1"
-fi
-
-if [[ -z $ZOO_tickTime ]]; then
-      ZOO_tickTime="2000"
-fi
-if [[ -z $ZOO_clientPort ]]; then
-      ZOO_clientPort="2128"
+if [[ ! -f "$config/log4j.properties" ]]; then
+    touch "$config/log4j.properties"
 fi
 
-
-# Create ID file if missing.
-if [[ ! -f "$ZOO_dataDir/myid" ]]; then
-    echo "${ZOO_ID}" > "$ZOO_dataDir/myid"
+# Set required parameters to defaults if missing
+if [[ ! grep -Fxq "tickTime" "$config/zoo.cfg" ]]; then
+    if [[ -z $CONF_ZOO_tickTime ]]; then
+        export ZOO_tickTime="2000"
+    fi
+fi
+if [[ ! grep -Fxq "clientPort" "$config/zoo.cfg" ]]; then
+    if [[ -z $CONF_ZOO_clientPort ]]; then
+        export ZOO_clientPort="2128"
+    fi
+fi
+if [[ ! grep -Fxq "server." "$config/zoo.cfg" ]]; then
+    if [[ -z $ZOO_SERVERS ]]; then
+        export ZOO_SERVERS="server.1=localhost:2888:3888;2181"
+    fi
 fi
 
+# Handle ZOO_ID special case
+if [[ ! -f "$CONF_ZOO_dataDir/myid" ]]; then
+    if [[ -z $ZOO_MY_ID ]]; then
+        export ZOO_MY_ID="1"
+    fi
+    echo "$ZOO_MY_ID" > "$CONF_ZOO_dataDir/myid"
+else
+    if [[ ! -z $ZOO_MY_ID ]]; then
+        echo "$ZOO_MY_ID" > "$CONF_ZOO_dataDir/myid"
+    fi
+fi
 
-# Create conf files if missing.
-CONFIG="$ZOO_HOME/conf/zoo.cfg"
-if [[ ! -f "$CONFIG" ]]; then
-    {
-        echo "dataDir=$ZOO_dataDir" 
-        echo "dataLogDir=$ZOO_dataLogDir"
-
-        echo "tickTime=$ZOO_tickTime"
-        echo "initLimit=$ZOO_initLimit"
-        echo "syncLimit=$ZOO_syncLimit"
-    } >> "$CONFIG"
-
+# Handle ZOO_SERVERS special case
+if [[ ! -z $ZOO_SERVERS ]]; then
+    sed -i '/^server./d' "$config/zoo.cfg"
     for server in $ZOO_SERVERS; do
-        echo "$server" >> "$CONFIG"
+        echo "$server" >> "$config/zoo.cfg"
     done
 fi
+
+# Add rest of conf
+function upsertProperty() {
+    local path=$1
+    local name=$2
+    local value=$3
+
+    if grep -Fxq "$name=" "$path"; then
+        sed -i "s|^\($name=\).*|\1$value|" $path
+    else
+        echo "$name=$value" >> "$path"
+    fi
+}
+
+function configure() {
+    local path=$1
+    local envPrefix=$2
+
+    local var
+    local value
+    
+    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do 
+        
+        name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
+        var="${envPrefix}_${c}"
+        value=${!var}
+        upsertProperty $path $name $value
+    done
+}
+
+configure $config/zoo.cfg CONF_ZOO
+configure $config/log4j.properties CONF_LOG4J
 
 # Start server.
 zkServer.sh start-foreground

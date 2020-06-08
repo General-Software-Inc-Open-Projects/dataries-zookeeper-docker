@@ -7,7 +7,7 @@ ENV ZOO_VERION="3.6.1" \
     ZOO_HOME="/opt/zookeeper" \
     PATH="${PATH}:${ZOO_HOME}/bin"
 
-ARG ZOOKEEPER_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOO_VERION}/zookeeper-${ZOO_VERION}.tar.gz
+ARG ZOO_URL=https://mirrors.sonic.net/apache/zookeeper/zookeeper-${ZOO_VERION}/zookeeper-${ZOO_VERION}.tar.gz
 
 RUN set -eux; \
         useradd -lU zookeeper
@@ -20,7 +20,7 @@ RUN set -eux; \
         apt-get clean
 
 RUN set -eux; \
-        curl ${ZOOKEEPER_URL} | tar -xz -C /opt; \
+        curl ${ZOO_URL} | tar -xz -C /opt; \
         mv /opt/zookeeper-${ZOO_VERION} ${ZOO_HOME}; \
         chown -R zookeeper:zookeeper ${ZOO_HOME}
 
