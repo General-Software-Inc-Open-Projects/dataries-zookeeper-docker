@@ -2,11 +2,16 @@
 
 set -e
 
+# Sensitive conf
+if [[ -z $CONF_ZOO_dataDir ]]; then
+    export CONF_ZOO_dataDir="$ZOO_HOME/data"
+fi
+
 # Create base conf file if missing
 config="$ZOO_HOME/conf"
 if [[ ! -f "$config/zoo.cfg" ]]; then
     cp "$config/zoo_sample.cfg" "$config/zoo.cfg"
-    sed -i "s|^\(dataDir=\).*|\1$ZOO_HOME/data|" "$config/zoo.cfg"
+    sed -i "s|^\(dataDir=\).*|\1$CONF_ZOO_dataDir|" "$config/zoo.cfg"
 fi
 
 # Handle ZOO_MY_ID special case
