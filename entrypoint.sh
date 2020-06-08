@@ -6,9 +6,10 @@ set -e
 config="$ZOO_HOME/conf"
 if [[ ! -f "$config/zoo.cfg" ]]; then
     cp "$config/zoo_sample.cfg" "$config/zoo.cfg"
+    sed -i "s|^\(dataDir=\).*|\1$ZOO_HOME/data|" "$config/zoo.cfg"
 fi
 
-# Handle ZOO_ID special case
+# Handle ZOO_MY_ID special case
 mkdir -p "$CONF_ZOO_dataDir"
 if [[ ! -f "$CONF_ZOO_dataDir/myid" ]]; then
     echo "1" > "$CONF_ZOO_dataDir/myid"
