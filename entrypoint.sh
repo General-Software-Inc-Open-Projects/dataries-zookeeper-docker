@@ -6,9 +6,7 @@ set -e
 export CONF_ZOO_dataDir="$ZOO_HOME/data"
 
 # Create data folder if missing
-if [[ ! -f "$CONF_ZOO_dataDir" ]]; then
-    mkdir "$CONF_ZOO_dataDir"
-fi
+mkdir -p "$CONF_ZOO_dataDir"
 
 # Create conf files if missing
 config="$ZOO_HOME/conf"
