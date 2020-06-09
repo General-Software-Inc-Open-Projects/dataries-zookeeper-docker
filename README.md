@@ -99,7 +99,7 @@ services:
 
 ## Volumes
 
-Zookeeper uses configuration files at `/opt/zookeeper/conf` folder. You can bind a external folder with the configuration files as follows:
+Zookeeper uses default configuration files in the `/opt/zookeeper/conf` folder. You can bind an external folder with your configuration files as follows:
 
 ~~~bash
 docker run -itd --name zookeeper -v /path/to/conf:/opt/zookeeper/conf -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
@@ -107,14 +107,14 @@ docker run -itd --name zookeeper -v /path/to/conf:/opt/zookeeper/conf -p 2181:21
 
 ## Environment variables
 
-The environment configuration is controlled via the following environment variable groups:
+The environment configuration is controlled via the following environment variable groups (PREFIX):
 
-> CONF_ZOO: affects zoo.cfg
-> CONF_LOG4J: affects log4j.properties
+    CONF_ZOO: affects zoo.cfg
+    CONF_LOG4J: affects log4j.properties
     
-Hadoop properties by setting an environment variable with the appropriated prefix in the form <PREFIX>_<PROPERTY>.
+Set environment variables with the appropriated group in the form <PREFIX>_<PROPERTY>.
 
-Due to restriction imposed by docker and docker-compose on environment variable names the following substitution are applied to property names:
+Due to restriction imposed by docker and docker-compose on environment variable names the following substitution are applied to PROPERTY names:
 
     _ => .
     __ => _
@@ -122,8 +122,5 @@ Due to restriction imposed by docker and docker-compose on environment variable 
 
 Following are some illustratory examples:
 
-    CORE_CONF_fs_defaultFS: sets the fs.defaultFS property in core-site.xml
-    YARN_CONF_yarn_log___aggregation___enable: sets the yarn.log-aggregation-enable property in yarn-site.xml
-
-
-<code><b>TEST_UNIT<b><code>
+    CONF_ZOO_dataLogDir=/opt/zookeeper/datalog: sets the dataLogDir property in zoo.cfg
+    CONF_ZOO_admin_enableServer=true: sets the admin.enableServer property in zoo.cfg
