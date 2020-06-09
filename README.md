@@ -35,13 +35,35 @@ docker run -itd --name zookeeper -v /path/to/store/data:/opt/zookeeper/data -v /
 docker exec -it zookeeper zkCli.sh
 ~~~
 
-## Check logs
+## Logging
+
+By default, ZooKeeper redirects stdout/stderr outputs to the console so you can run the next command to find logs:
 
 ~~~bash
 docker logs zookeeper
 ~~~
 
+However you can redirect logs to files in `/opt/zookeeper/logs` by passing the environment variable ZOO_LOG4J_PROP as follows:
+
+~~~bash
+docker run -itd --name zookeeper -e ZOO_LOG4J_PROP="INFO,ROLLINGFILE" -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
+~~~
+
+Check [ZooKeeper Logging](https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_logging) for more details.
+
 # Deploy a cluster
+
+Environment variables below are mandatory if you want to run Zookeeper in replicated mode.
+
+<html><b>ZOO_MY_ID</b></html>
+
+The id must be unique within the ensemble and should have a value between 1 and 255.
+
+<html><b>ZOO_SERVERS</b></html>
+
+This variable allows you to specify a list of machines of the Zookeeper ensemble. Each entry has the form of `server.id=<address1>:<port1>:<port2>[:role];[<client port address>:]<client port>`. Entries are separated by spaces.
+
+Check [Zookeeper Dynamic Reconfiguration](https://zookeeper.apache.org/doc/current/zookeeperReconfig.html) for more details.
 
 Example using `docker-compose`:
 
