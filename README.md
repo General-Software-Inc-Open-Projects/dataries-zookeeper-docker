@@ -55,11 +55,11 @@ Check [ZooKeeper Logging](https://zookeeper.apache.org/doc/current/zookeeperAdmi
 
 Environment variables below are mandatory if you want to run Zookeeper in replicated mode.
 
-**ZOO_MY_ID**
+### `ZOO_MY_ID`
 
 The id must be unique within the ensemble and should have a value between 1 and 255.
 
-*ZOO_SERVERS*
+### `ZOO_SERVERS`
 
 This variable allows you to specify a list of machines of the Zookeeper ensemble. Each entry has the form of `server.id=<address1>:<port1>:<port2>[:role];[<client port address>:]<client port>` and are separated by spaces.
 
