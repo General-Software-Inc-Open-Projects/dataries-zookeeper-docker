@@ -162,3 +162,11 @@ Another example use case for the JVMFLAGS is setting a maximum JVM heap size of 
 ~~~bash
 docker run -itd --name zookeeper -e JVMFLAGS="-Xmx1024m" -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
 ~~~
+
+# License
+
+View [license information](https://github.com/apache/zookeeper/blob/master/LICENSE.txt) for the software contained in this image.
+
+As with all Docker images, these likely also contain other software which may be under other licenses (such as Bash, etc from the base distribution, along with any direct or indirect dependencies of the primary software being contained).
+
+As for any pre-built image usage, it is the image user's responsibility to ensure that any use of this image complies with any relevant licenses for all software contained within.
