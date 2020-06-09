@@ -16,13 +16,17 @@ This image was created with the intention of adding extra configuration options 
 ## Start a single node Zookeeper server
 
 ~~~bash
-docker run -itd --name zoo -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
+docker run -itd --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
 ~~~
 
 ## Persist data
 
-This image is runned using a non root user `zookeeper` who owns the `/opt/zookeeper` folder. By default, data is stored in `/opt/zookeeper/data`.
+> This image is runned using a non root user `zookeeper` who owns the `/opt/zookeeper` folder. By default, zookeeper's data and datalog are stored in `/opt/zookeeper/data` and `/opt/zookeeper/datalog`. You can bind local volumes to each as follows:
 
+~~~bash
+docker run -itd --name zookeeper -v /path/to/store/data:/opt/zookeeper/data -v /path/to/store/datalog:/opt/zookeeper/datalog -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
+~~~
+ 
 ## Connect to Zookeeper from the command line client
 
 ~~~bash
@@ -30,6 +34,10 @@ docker exec -it zookeeper zkCli.sh
 ~~~
 
 ## Check logs
+
+~~~bash
+docker logs zookeeper
+~~~
 
 # Deploy a cluster
 
@@ -39,8 +47,8 @@ Example using `docker-compose`:
 version: "3.7"
 
 networks:
-  dataries-net:
-    name: dataries-net
+  private-net:
+    name: private-net
     driver: bridge
     ipam:
       driver: default
@@ -49,42 +57,39 @@ networks:
 
 services:
   zoo-1:
-    image: dataries-registry.generalsoftwareinc.net:5000/gsi/zookeeper
+    image: gsiopen/zookeeper:3.6.1
     container_name: zoo-1
     hostname: zoo-1
     environment:
-      - ZOO_ID=1
-      - ZOO_AMOUNT=3
-      - ZOO_HOSTNAME_FORMAT=zoo-{ZOO_ID}
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=server.1=0.0.0.0:2888:3888;2181 server.2=zoo-2:2888:3888;2181 server.3=zoo-3:2888:3888;2181
     restart: on-failure
     networks:
-      dataries-net:
+      private-net:
         ipv4_address: 192.168.1.2
 
   zoo-2:
-    image: dataries-registry.generalsoftwareinc.net:5000/gsi/zookeeper
+    image: gsiopen/zookeeper:3.6.1
     container_name: zoo-2
     hostname: zoo-2
     environment:
-      - ZOO_ID=2
-      - ZOO_AMOUNT=3
-      - ZOO_HOSTNAME_FORMAT=zoo-{ZOO_ID}
+      - ZOO_MY_ID=2
+      - ZOO_SERVERS=server.1=zoo-1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo-3:2888:3888;2181
     restart: on-failure
     networks:
-      dataries-net:
+      private-net:
         ipv4_address: 192.168.1.3
 
   zoo-3:
-    image: dataries-registry.generalsoftwareinc.net:5000/gsi/zookeeper
+    image: gsiopen/zookeeper:3.6.1
     container_name: zoo-3
     hostname: zoo-3
     environment:
-      - ZOO_ID=3
-      - ZOO_AMOUNT=3
-      - ZOO_HOSTNAME_FORMAT=zoo-{ZOO_ID}
+      - ZOO_MY_ID=3
+      - ZOO_SERVERS=server.1=zoo-1:2888:3888;2181 server.2=zoo-2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
     restart: on-failure
     networks:
-      dataries-net:
+      private-net:
         ipv4_address: 192.168.1.4
 ~~~
 
