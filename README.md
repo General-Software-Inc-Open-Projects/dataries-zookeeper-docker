@@ -21,7 +21,9 @@ docker run -itd --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 
 
 ## Persist data
 
-> This image is runned using a non root user `zookeeper` who owns the `/opt/zookeeper` folder. By default, zookeeper's data and datalog are stored in `/opt/zookeeper/data` and `/opt/zookeeper/datalog`. You can bind local volumes to each as follows:
+> This image is runned using a non root user `zookeeper` who owns the `/opt/zookeeper` folder.
+
+By default, zookeeper's data and datalog are stored in `/opt/zookeeper/data` and `/opt/zookeeper/datalog`. You can bind local volumes to each as follows:
 
 ~~~bash
 docker run -itd --name zookeeper -v /path/to/store/data:/opt/zookeeper/data -v /path/to/store/datalog:/opt/zookeeper/datalog -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
