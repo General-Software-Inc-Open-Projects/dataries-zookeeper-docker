@@ -107,12 +107,12 @@ docker run -itd --name zookeeper -v /path/to/conf:/opt/zookeeper/conf -p 2181:21
 
 ## Environment variables
 
-The environment configuration is controlled via the following environment variable groups (PREFIX):
+The environment configuration is controlled via the following environment variable groups or PREFIX:
 
     CONF_ZOO: affects zoo.cfg
     CONF_LOG4J: affects log4j.properties
     
-Set environment variables with the appropriated group in the form <PREFIX>_<PROPERTY>.
+Set environment variables with the appropriated group in the form PREFIX_PROPERTY.
 
 Due to restriction imposed by docker and docker-compose on environment variable names the following substitution are applied to PROPERTY names:
 
@@ -124,3 +124,19 @@ Following are some illustratory examples:
 
     CONF_ZOO_dataLogDir=/opt/zookeeper/datalog: sets the dataLogDir property in zoo.cfg
     CONF_ZOO_admin_enableServer=true: sets the admin.enableServer property in zoo.cfg
+    
+## Java
+
+Another option would be using `JVMFLAGS` environment variable. Many of the Zookeeper advanced configuration options can be set there using Java system properties in the form of `-Dproperty=value`. For example, you can use Netty instead of NIO (default option) as a server communication framework:
+
+~~~bash
+docker run -itd --name zookeeper -e JVMFLAGS="-Dzookeeper.serverCnxnFactory=org.apache.zookeeper.server.NettyServerCnxnFactory" -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
+~~~
+
+See [Advanced Configuration](https://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_advancedConfiguration) for the full list of supported Java system properties.
+
+Another example use case for the JVMFLAGS is setting a maximum JVM heap size of 1 GB:
+
+~~~bash
+docker run -itd --name zookeeper -e JVMFLAGS="-Xmx1024m" -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
+~~~
