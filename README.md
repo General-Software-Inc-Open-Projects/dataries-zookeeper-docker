@@ -16,7 +16,7 @@ This image was created with the intention of adding extra configuration options 
 ## Start a single node Zookeeper server
 
 ~~~bash
-docker run -itd --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
+docker run -itd --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
 ~~~
 
 ## Persist data
@@ -26,7 +26,7 @@ docker run -itd --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 
 By default, zookeeper's data and datalog are stored in `/opt/zookeeper/data` and `/opt/zookeeper/datalog`. You can bind local volumes to each as follows:
 
 ~~~bash
-docker run -itd --name zookeeper -v /path/to/store/data:/opt/zookeeper/data -v /path/to/store/datalog:/opt/zookeeper/datalog -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
+docker run -itd --name zookeeper -v /path/to/store/data:/opt/zookeeper/data -v /path/to/store/datalog:/opt/zookeeper/datalog -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
 ~~~
  
 ## Connect to Zookeeper from the command line client
@@ -99,6 +99,31 @@ services:
 
 ## Volumes
 
+Zookeeper uses configuration files at `/opt/zookeeper/conf` folder. You can bind a external folder with the configuration files as follows:
+
+~~~bash
+docker run -itd --name zookeeper -v /path/to/conf:/opt/zookeeper/conf -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080:8080 --restart on-failure gsiopen/zookeeper:3.6.1
+~~~
+
 ## Environment variables
+
+The environment configuration is controlled via the following environment variable groups:
+
+> CONF_ZOO: affects zoo.cfg
+> CONF_LOG4J: affects log4j.properties
+    
+Hadoop properties by setting an environment variable with the appropriated prefix in the form <PREFIX>_<PROPERTY>.
+
+Due to restriction imposed by docker and docker-compose on environment variable names the following substitution are applied to property names:
+
+    _ => .
+    __ => _
+    ___ => -
+
+Following are some illustratory examples:
+
+    CORE_CONF_fs_defaultFS: sets the fs.defaultFS property in core-site.xml
+    YARN_CONF_yarn_log___aggregation___enable: sets the yarn.log-aggregation-enable property in yarn-site.xml
+
 
 <code><b>TEST_UNIT<b><code>
