@@ -6,6 +6,9 @@ set -e
 if [[ -z $CONF_ZOO_dataDir ]]; then
     export CONF_ZOO_dataDir="$ZOO_HOME/data"
 fi
+if [[ -z $CONF_ZOO_dataLogDir ]]; then
+    export CONF_ZOO_dataLogDir="$ZOO_HOME/datalog"
+fi
 
 # Create base conf file if missing
 config="$ZOO_HOME/conf"
