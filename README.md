@@ -1,6 +1,6 @@
 # Description
 
-This image was created with the intention of achieving an easier deployment of Apache Zookeeper component on Docker. You can find the official image [here](https://hub.docker.com/r/_/zookeeper).
+This image was created with the intention of adding extra configuration options to the deployment of Apache Zookeeper component on Docker. We are not associated with Apache or Zookeeper in anyway. You can find the official docker image [here](https://hub.docker.com/r/_/zookeeper).
 
 # Quick reference
 
@@ -16,15 +16,17 @@ This image was created with the intention of achieving an easier deployment of A
 ## Start a single node Zookeeper server
 
 ~~~bash
-docker run -itd --name zoo-1 -h zoo-1 -e "ZOO_ID=1" -e "ZOO_AMOUNT=1" -e "ZOO_HOSTNAME_FORMAT=zoo-{ZOO_ID}" -p 2888:2888 -p 3888:3888 --restart always dataries/zookeeper
+docker run -itd --name zoo -p 2181:2181 -p 2888:2888 -p 3888:3888 -p 8080 --restart on-failure gsiopen/zookeeper:3.6.1
 ~~~
 
 ## Persist data
 
+This image is runned using a non root user `zookeeper` who owns the `/opt/zookeeper` folder. By default, data is stored in `/opt/zookeeper/data`.
+
 ## Connect to Zookeeper from the command line client
 
 ~~~bash
-docker exec -it zoo-1 bin/zkCli.sh
+docker exec -it zookeeper zkCli.sh
 ~~~
 
 ## Check logs
