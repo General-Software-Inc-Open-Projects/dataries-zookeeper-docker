@@ -2,7 +2,6 @@
 
 set -e
 
-
 function upsertProperty() {
     local path=$1
     local name=$2
@@ -30,7 +29,6 @@ function configure() {
     done
 }
 
-
 # Sensitive conf
 if [[ -z $CONF_ZOO_dataDir ]]; then
     export CONF_ZOO_dataDir="$ZOO_HOME/data"
@@ -45,13 +43,17 @@ if [[ ! -f "$config/zoo.cfg" ]]; then
     cp "$config/zoo_sample.cfg" "$config/zoo.cfg"
 fi
 
+# Add envs of conf
+configure "$config/zoo.cfg" "CONF_ZOO"
+configure "$config/log4j.properties" "CONF_LOG4J"
+
 # Handle ZOO_MY_ID special case
 mkdir -p "$CONF_ZOO_dataDir"
-if [[ ! -f "$CONF_ZOO_dataDir/myid" ]]; then
-    echo "1" > "$CONF_ZOO_dataDir/myid"
-else
-    if [[ ! -z $ZOO_MY_ID ]]; then
-        echo "$ZOO_MY_ID" > "$CONF_ZOO_dataDir/myid"
+if [[ ! -z $ZOO_MY_ID ]]; then
+    echo "$ZOO_MY_ID" > "$CONF_ZOO_dataDir/myid"
+else 
+    if [[ ! -f "$CONF_ZOO_dataDir/myid" ]]; then
+        echo "1" > "$CONF_ZOO_dataDir/myid"
     fi
 fi
 
@@ -62,10 +64,6 @@ if [[ ! -z $ZOO_SERVERS ]]; then
         echo "$server" >> "$config/zoo.cfg"
     done
 fi
-
-# Add rest of conf
-configure "$config/zoo.cfg" "CONF_ZOO"
-configure "$config/log4j.properties" "CONF_LOG4J"
 
 # Start server
 zkServer.sh start-foreground
