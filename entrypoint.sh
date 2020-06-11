@@ -2,6 +2,35 @@
 
 set -e
 
+
+function upsertProperty() {
+    local path=$1
+    local name=$2
+    local value=$3
+
+    if grep -q "^$name=" "$path"; then
+        sed -i "s|^\($name=\).*|\1$value|" $path
+    else
+        echo "$name=$value" >> "$path"
+    fi
+}
+
+function configure() {
+    local path=$1
+    local envPrefix=$2
+
+    local var
+    local value
+
+    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
+        name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
+        var="${envPrefix}_${c}"
+        value=${!var}
+        upsertProperty $path $name $value
+    done
+}
+
+
 # Sensitive conf
 if [[ -z $CONF_ZOO_dataDir ]]; then
     export CONF_ZOO_dataDir="$ZOO_HOME/data"
@@ -32,35 +61,8 @@ if [[ ! -z $ZOO_SERVERS ]]; then
 fi
 
 # Add rest of conf
-function upsertProperty() {
-    local path=$1
-    local name=$2
-    local value=$3
-
-    if grep -q "^$name=" "$path"; then
-        sed -i "s|^\($name=\).*|\1$value|" $path
-    else
-        echo "$name=$value" >> "$path"
-    fi
-}
-
-function configure() {
-    local path=$1
-    local envPrefix=$2
-
-    local var
-    local value
-
-    for c in `printenv | perl -sne 'print "$1 " if m/^${envPrefix}_(.+?)=.*/' -- -envPrefix=$envPrefix`; do
-        name=`echo ${c} | perl -pe 's/___/-/g; s/__/_/g; s/_/./g'`
-        var="${envPrefix}_${c}"
-        value=${!var}
-        upsertProperty $path $name $value
-    done
-}
-
-configure $config/zoo.cfg CONF_ZOO
-configure $config/log4j.properties CONF_LOG4J
+configure "$config/zoo.cfg" "CONF_ZOO"
+configure "$config/log4j.properties" "CONF_LOG4J"
 
 # Start server
 zkServer.sh start-foreground
