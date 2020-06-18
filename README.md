@@ -4,8 +4,8 @@ This image was created with the intention of adding extra configuration options 
 
 # Quick reference
 
-- Maintained by: [General Software Inc Open Projects](https://github.com/General-Software-Inc-Open-Projects/zookeeper-docker)
-- Where to file issues: [GitHub Issues](https://github.com/General-Software-Inc-Open-Projects/zookeeper-docker/issues)
+- Maintained by: [General Software Inc Open Projects](https://github.com/General-Software-Inc-Open-Projects/dataries-zookeeper-docker)
+- Where to file issues: [GitHub Issues](https://github.com/General-Software-Inc-Open-Projects/dataries-zookeeper-docker/issues)
 
 # What is Apache Zookeeper?
 
